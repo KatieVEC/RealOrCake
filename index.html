@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real or Cake?</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #f4f4f4; }
+        .hidden { display: none; }
+        .game-container { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
+        .image-container { display: flex; justify-content: center; gap: 20px; }
+        .image-container img { width: 200px; height: auto; cursor: pointer; border: 5px solid transparent; border-radius: 10px; }
+        .correct { border-color: green; }
+        .score { font-size: 20px; margin-top: 20px; }
+        button { padding: 10px 20px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; color: white; }
+        .start-btn { background-color: green; }
+        .reset-btn { background-color: red; margin-top: 20px; }
+        .start-btn:hover { background-color: darkgreen; }
+        .reset-btn:hover { background-color: darkred; }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h1>Real or Cake?</h1>
+        <button class="start-btn" onclick="startGame()">Start</button>
+    </div>
+    
+    <div id="game" class="hidden">
+        <div class="game-container">
+            <p id="message"></p>
+            <div class="image-container" id="imageContainer"></div>
+            <p class="score">Score: <span id="score">0</span></p>
+            <button class="reset-btn" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+    
+    <script>
+        let score = 0;
+        let rounds = 0;
+        const totalRounds = 10;
+        const images = ["balloon", "burger", "apple", "banana", "shirt"];
+        
+        function startGame() {
+            score = 0;
+            rounds = 0;
+            document.getElementById("score").textContent = `${score} / ${totalRounds}`;
+            document.getElementById("menu").classList.add("hidden");
+            document.getElementById("game").classList.remove("hidden");
+            loadNewImages();
+        }
+        
+        function resetGame() {
+            score = 0;
+            rounds = 0;
+            document.getElementById("score").textContent = `${score} / ${totalRounds}`;
+            document.getElementById("message").innerText = "";
+            document.getElementById("menu").classList.remove("hidden");
+            document.getElementById("game").classList.add("hidden");
+        }
+        
+        function loadNewImages() {
+            if (rounds >= totalRounds) {
+                document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
+                return;
+            }
+            
+            let imageContainer = document.getElementById("imageContainer");
+            imageContainer.innerHTML = "";
+            document.getElementById("message").innerText = "";
+            
+            let randomImage = images[Math.floor(Math.random() * images.length)];
+            let realImage = `images/${randomImage}1.png`;
+            let cakeImage = `images/${randomImage}2.png`;
+            let pair = Math.random() > 0.5 ? [realImage, cakeImage] : [cakeImage, realImage];
+            
+            pair.forEach((imgSrc, index) => {
+                let img = document.createElement("img");
+                img.src = imgSrc;
+                img.onclick = () => checkAnswer(imgSrc.includes("1"), img);
+                imageContainer.appendChild(img);
+            });
+        }
+        
+        function checkAnswer(isReal, imgElement) {
+            let imageContainer = document.getElementById("imageContainer");
+            if (isReal) {
+                let proofImage = document.createElement("img");
+                let imageName = imgElement.src.match(/images\/(.*?)1\.png/);
+                if (imageName) {
+                    proofImage.src = `images/${imageName[1]}3.png`;
+                    proofImage.style.marginLeft = "20px";
+                    proofImage.style.borderRadius = "10px";
+                    imageContainer.appendChild(proofImage);
+                }
+                imgElement.classList.add("correct");
+                document.getElementById("message").innerText = "Correct!";
+                score++;
+            } else {
+                document.getElementById("message").innerText = "Try again!";
+            }
+            
+            rounds++;
+            document.getElementById("score").textContent = `${score} / ${totalRounds}`;
+            
+            if (rounds < totalRounds) {
+                setTimeout(loadNewImages, 1000);
+            } else {
+                document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
+            }
+        }
+    </script>
+</body>
+</html>
