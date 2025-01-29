@@ -19,6 +19,11 @@
         .reset-btn { background-color: red; margin-top: 20px; }
         .start-btn:hover { background-color: darkgreen; }
         .reset-btn:hover { background-color: darkred; }
+        #game-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
     </style>
 </head>
 <body>
@@ -29,6 +34,7 @@
     
     <div id="game" class="hidden">
         <div class="game-container">
+            <h2 id="game-title">Which one is the cake?</h2>
             <p id="message"></p>
             <div class="image-container" id="imageContainer"></div>
             <p class="score">Score: <span id="score">0</span></p>
