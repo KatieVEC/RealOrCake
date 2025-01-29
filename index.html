@@ -8,9 +8,11 @@
         body { text-align: center; font-family: Arial, sans-serif; background-color: #f4f4f4; }
         .hidden { display: none; }
         .game-container { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-        .image-container { display: flex; justify-content: center; gap: 20px; }
+        .image-container { display: flex; justify-content: center; gap: 20px; position: relative; }
         .image-container img { width: 200px; height: 200px; object-fit: cover; cursor: pointer; border: 5px solid transparent; border-radius: 10px; }
-        .correct { border-color: green; }
+        .correct { border-color: green !important; }
+        .incorrect { border-color: red !important; }
+        .proof-image { position: absolute; z-index: 10; width: 200px; height: 200px; object-fit: cover; border-radius: 10px; display: none; }
         .score { font-size: 20px; margin-top: 20px; }
         button { padding: 10px 20px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; color: white; }
         .start-btn { background-color: green; }
@@ -38,11 +40,13 @@
         let score = 0;
         let rounds = 0;
         const totalRounds = 10;
-        const images = ["shirt", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+        const images = ["shirt", "poppit"];
+        let roundIncorrect = false;  // Flag for the current round if the first click is wrong
         
         function startGame() {
             score = 0;
             rounds = 0;
+            roundIncorrect = false;  // Reset flag at the start of the game
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
             document.getElementById("menu").classList.add("hidden");
             document.getElementById("game").classList.remove("hidden");
@@ -52,6 +56,7 @@
         function resetGame() {
             score = 0;
             rounds = 0;
+            roundIncorrect = false;  // Reset flag when the game is reset
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
             document.getElementById("message").innerText = "";
             document.getElementById("menu").classList.remove("hidden");
@@ -63,50 +68,99 @@
                 document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
                 return;
             }
-            
+
             let imageContainer = document.getElementById("imageContainer");
             imageContainer.innerHTML = "";
             document.getElementById("message").innerText = "";
+            
+            // Reset roundIncorrect flag at the start of each round
+            roundIncorrect = false;  
             
             let randomImage = images[Math.floor(Math.random() * images.length)];
             let realImage = `images/${randomImage}1.png`;
             let cakeImage = `images/${randomImage}2.png`;
             let pair = Math.random() > 0.5 ? [realImage, cakeImage] : [cakeImage, realImage];
             
+            let realImageIndex = pair.indexOf(realImage);
+            let cakeImageIndex = pair.indexOf(cakeImage);
+
             pair.forEach((imgSrc, index) => {
                 let img = document.createElement("img");
                 img.src = imgSrc;
-                img.onclick = () => checkAnswer(imgSrc.includes("1"), img);
+                img.classList.add("img-element");
+                img.onclick = () => checkAnswer(index === realImageIndex, img, pair, realImageIndex, realImage);
                 imageContainer.appendChild(img);
             });
         }
         
-        function checkAnswer(isReal, imgElement) {
+        function checkAnswer(isReal, imgElement, pair, realImageIndex, realImage) {
             let imageContainer = document.getElementById("imageContainer");
+            const allImages = imageContainer.querySelectorAll('.img-element');
+            
+            // Clear previous borders
+            allImages.forEach(img => img.classList.remove("correct", "incorrect"));
+            
+            // Add border based on answer
             if (isReal) {
-                let proofImage = document.createElement("img");
-                let imageName = imgElement.src.match(/images\/(.*?)1\.png/);
-                if (imageName) {
-                    proofImage.src = `images/${imageName[1]}3.png`;
-                    proofImage.style.marginLeft = "20px";
-                    proofImage.style.borderRadius = "10px";
-                    imageContainer.appendChild(proofImage);
-                }
-                imgElement.classList.add("correct");
+                imgElement.classList.add("correct");  // Green border for correct answer
                 document.getElementById("message").innerText = "Correct!";
-                score++;
+                
+                // If the first click is correct, award a point
+                if (!roundIncorrect) {
+                    score++;
+                }
             } else {
-                document.getElementById("message").innerText = "Try again!";
+                imgElement.classList.add("incorrect");  // Red border for incorrect answer
+                document.getElementById("message").innerText = "Sorry, that's not correct.";
+                
+                // Flag this round as incorrect if it's the first click
+                if (!roundIncorrect) {
+                    roundIncorrect = true;
+                }
             }
             
+            // Create and display proof image over the correct image (either real or cake)
+            let proofImage = document.createElement("img");
+            let imageName = imgElement.src.match(/images\/(.*?)1\.png/);
+            if (imageName) {
+                proofImage.src = `images/${imageName[1]}3.png`; // The "proof" image
+                proofImage.classList.add("proof-image"); // Ensure it's on top
+                
+                // Get the correct image, regardless of answer correctness
+                let correctImage = allImages[realImageIndex];
+                
+                // Create the proof image over the correct image, regardless of the answer being correct or incorrect
+                let correctRect = correctImage.getBoundingClientRect();
+                proofImage.style.display = 'block'; // Show the proof image
+                proofImage.style.left = `${correctRect.left - imageContainer.getBoundingClientRect().left}px`;
+                proofImage.style.top = `${correctRect.top - imageContainer.getBoundingClientRect().top}px`;
+
+                // Apply the correct green border to the proof image if it's the correct answer
+                if (isReal) {
+                    proofImage.classList.add("correct");
+                }
+
+                imageContainer.appendChild(proofImage);
+            }
+
+            // Keep both images visible, hide only the cake image (if necessary)
+            if (!isReal) {  // Only hide cake image if the answer is wrong
+                allImages[cakeImageIndex].style.opacity = '0';  // Hide the cake image (not disappearing)
+            }
+
+            // Increment rounds only after the first click
             rounds++;
+            
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
             
-            if (rounds < totalRounds) {
-                setTimeout(loadNewImages, 1000);
-            } else {
-                document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
-            }
+            // Delay before loading next round to allow proof image to be seen
+            setTimeout(() => {
+                if (rounds < totalRounds) {
+                    loadNewImages();
+                } else {
+                    document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
+                }
+            }, 1000);
         }
     </script>
 </body>
