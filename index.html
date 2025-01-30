@@ -20,10 +20,10 @@
         .start-btn:hover { background-color: darkgreen; }
         .reset-btn:hover { background-color: darkred; }
         #game-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -47,12 +47,14 @@
         let rounds = 0;
         const totalRounds = 12;
         const images = ["shirt", "poppit", "burger", "apple", "brush", "butter", "shoe", "lock", "popcorn", "icecream"];
+        let shownImages = []; // Track which images have been shown
         let roundIncorrect = false;  // Flag for the current round if the first click is wrong
         
         function startGame() {
             score = 0;
             rounds = 0;
             roundIncorrect = false;  // Reset flag at the start of the game
+            shownImages = []; // Clear the list of shown images
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
             document.getElementById("menu").classList.add("hidden");
             document.getElementById("game").classList.remove("hidden");
@@ -63,6 +65,7 @@
             score = 0;
             rounds = 0;
             roundIncorrect = false;  // Reset flag when the game is reset
+            shownImages = []; // Reset the list of shown images
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
             document.getElementById("message").innerText = "";
             document.getElementById("menu").classList.remove("hidden");
@@ -82,7 +85,13 @@
             // Reset roundIncorrect flag at the start of each round
             roundIncorrect = false;  
             
+            // Get a random image that hasn't been shown yet
             let randomImage = images[Math.floor(Math.random() * images.length)];
+            while (shownImages.includes(randomImage)) {
+                randomImage = images[Math.floor(Math.random() * images.length)];
+            }
+            shownImages.push(randomImage); // Add this image to the list of shown images
+            
             let realImage = `images/${randomImage}1.png`;
             let cakeImage = `images/${randomImage}2.png`;
             let pair = Math.random() > 0.5 ? [realImage, cakeImage] : [cakeImage, realImage];
