@@ -5,20 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real or Cake?</title>
     <style>
-        body { text-align: center; font-family: Arial, sans-serif; background-color: #f4f4f4; }
-        .hidden { display: none; }
-        .game-container { margin-top: 20px; display: flex; flex-direction: column; align-items: center; }
-        .image-container { display: flex; justify-content: center; gap: 20px; position: relative; }
-        .image-container img { width: 200px; height: 200px; object-fit: cover; cursor: pointer; border: 5px solid transparent; border-radius: 10px; }
-        .correct { border-color: green !important; }
-        .incorrect { border-color: red !important; }
-        .proof-image { position: absolute; z-index: 10; width: 200px; height: 200px; object-fit: cover; border-radius: 10px; display: none; }
-        .score { font-size: 20px; margin-top: 20px; }
-        button { padding: 10px 20px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; color: white; }
-        .start-btn { background-color: green; }
-        .reset-btn { background-color: red; margin-top: 20px; }
-        .start-btn:hover { background-color: darkgreen; }
-        .reset-btn:hover { background-color: darkred; }
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden { 
+            display: none; 
+        }
+
+        #menu, #game {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%; /* Ensure both menus take up full width of the container */
+            max-width: 600px; /* Optional: restrict width of both the menu and game */
+        }
+
+        #menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game {
+            display: none; /* Hide the game screen initially */
+        }
+
+        .game-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center; /* Ensures text is centred within the game */
+            width: 100%; /* Ensures container uses full available width */
+            max-width: 600px; /* Optional, same as #game */
+        }
+
+        .image-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        .image-container img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 5px solid transparent;
+            border-radius: 10px;
+        }
+
+        .correct { 
+            border-color: green !important; 
+        }
+
+        .incorrect { 
+            border-color: red !important; 
+        }
+
+        .proof-image { 
+            position: absolute; 
+            z-index: 10; 
+            width: 200px; 
+            height: 200px; 
+            object-fit: cover; 
+            border-radius: 10px; 
+            display: none; 
+        }
+
+        .score { 
+            font-size: 20px; 
+            margin-top: 20px; 
+        }
+
+        button { 
+            padding: 10px 20px; 
+            font-size: 16px; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            color: white; 
+        }
+
+        .start-btn { 
+            background-color: green; 
+        }
+
+        .reset-btn { 
+            background-color: red; 
+            margin-top: 20px; 
+        }
+
+        .start-btn:hover { 
+            background-color: darkgreen; 
+        }
+
+        .reset-btn:hover { 
+            background-color: darkred; 
+        }
+
         #game-title {
             font-size: 24px;
             font-weight: bold;
@@ -46,23 +141,24 @@
         let score = 0;
         let rounds = 0;
         const totalRounds = 12;
-        const images = ["shirt", "poppit", "burger", "apple", "brush", "butter", "shoe", "lock", "popcorn", "icecream", "helmet", "pear"];
+        const images = ["shirt", "poppit", "burger", "apple", "brush", "butter", "shoe", "lock", "popcorn", "icecream", "cake", "laptop"];
         let shownImages = []; // Track which images have been shown
         let roundIncorrect = false;  // Flag for the current round if the first click is wrong
         
-        // Start game function
         function startGame() {
             score = 0;
             rounds = 0;
             roundIncorrect = false;  // Reset flag at the start of the game
             shownImages = []; // Clear the list of shown images
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
-            document.getElementById("menu").classList.add("hidden");
-            document.getElementById("game").classList.remove("hidden");
+            
+            // Hide the menu and show the game
+            document.getElementById("menu").style.display = "none"; // Hide the menu
+            document.getElementById("game").style.display = "flex"; // Show the game
+            
             loadNewImages();
         }
         
-        // Reset game function
         function resetGame() {
             score = 0;
             rounds = 0;
@@ -70,20 +166,20 @@
             shownImages = []; // Reset the list of shown images
             document.getElementById("score").textContent = `${score} / ${totalRounds}`;
             document.getElementById("message").innerText = "";
-            document.getElementById("menu").classList.remove("hidden");
-            document.getElementById("game").classList.add("hidden");
+            
+            // Show the menu again and hide the game
+            document.getElementById("menu").style.display = "flex"; // Show the menu
+            document.getElementById("game").style.display = "none"; // Hide the game
         }
         
-        // Load new images function
         function loadNewImages() {
-            console.log(`Rounds: ${rounds}, Shown Images: ${shownImages.length}`);
             if (rounds >= totalRounds) {
                 document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
-                return;  // Game ends after the 12th round
+                return;
             }
 
             let imageContainer = document.getElementById("imageContainer");
-            imageContainer.innerHTML = ""; // Clear the image container for the new round
+            imageContainer.innerHTML = "";
             document.getElementById("message").innerText = "";
             
             // Reset roundIncorrect flag at the start of each round
@@ -91,21 +187,10 @@
             
             // Get a random image that hasn't been shown yet
             let randomImage = images[Math.floor(Math.random() * images.length)];
-            console.log(`Random image selected: ${randomImage}`);
             while (shownImages.includes(randomImage)) {
                 randomImage = images[Math.floor(Math.random() * images.length)];
-                console.log(`Image already shown, picking another: ${randomImage}`);
             }
-
-            // Check if we've run out of unique images (if so, stop the game)
-            if (shownImages.length >= images.length) {
-                document.getElementById("message").innerText = "Not enough unique images for more rounds.";
-                console.log("Not enough unique images for more rounds.");
-                return;
-            }
-
             shownImages.push(randomImage); // Add this image to the list of shown images
-            console.log(`Image added to shown list: ${randomImage}`);
             
             let realImage = `images/${randomImage}1.png`;
             let cakeImage = `images/${randomImage}2.png`;
@@ -114,7 +199,6 @@
             let realImageIndex = pair.indexOf(realImage);
             let cakeImageIndex = pair.indexOf(cakeImage);
 
-            // Create image elements
             pair.forEach((imgSrc, index) => {
                 let img = document.createElement("img");
                 img.src = imgSrc;
@@ -124,7 +208,6 @@
             });
         }
         
-        // Check answer function
         function checkAnswer(isReal, imgElement, pair, realImageIndex, realImage) {
             let imageContainer = document.getElementById("imageContainer");
             const allImages = imageContainer.querySelectorAll('.img-element');
