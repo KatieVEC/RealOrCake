@@ -46,10 +46,11 @@
         let score = 0;
         let rounds = 0;
         const totalRounds = 12;
-        const images = ["shirt", "poppit", "burger", "apple", "brush", "butter", "shoe", "lock", "popcorn", "icecream"];
+        const images = ["shirt", "poppit", "burger", "apple", "brush", "butter", "shoe", "lock", "popcorn", "icecream", "helmet", "pear"];
         let shownImages = []; // Track which images have been shown
         let roundIncorrect = false;  // Flag for the current round if the first click is wrong
         
+        // Start game function
         function startGame() {
             score = 0;
             rounds = 0;
@@ -61,6 +62,7 @@
             loadNewImages();
         }
         
+        // Reset game function
         function resetGame() {
             score = 0;
             rounds = 0;
@@ -72,14 +74,16 @@
             document.getElementById("game").classList.add("hidden");
         }
         
+        // Load new images function
         function loadNewImages() {
+            console.log(`Rounds: ${rounds}, Shown Images: ${shownImages.length}`);
             if (rounds >= totalRounds) {
                 document.getElementById("message").innerText = `Game Over! Final Score: ${score} / ${totalRounds}`;
-                return;
+                return;  // Game ends after the 12th round
             }
 
             let imageContainer = document.getElementById("imageContainer");
-            imageContainer.innerHTML = "";
+            imageContainer.innerHTML = ""; // Clear the image container for the new round
             document.getElementById("message").innerText = "";
             
             // Reset roundIncorrect flag at the start of each round
@@ -87,10 +91,21 @@
             
             // Get a random image that hasn't been shown yet
             let randomImage = images[Math.floor(Math.random() * images.length)];
+            console.log(`Random image selected: ${randomImage}`);
             while (shownImages.includes(randomImage)) {
                 randomImage = images[Math.floor(Math.random() * images.length)];
+                console.log(`Image already shown, picking another: ${randomImage}`);
             }
+
+            // Check if we've run out of unique images (if so, stop the game)
+            if (shownImages.length >= images.length) {
+                document.getElementById("message").innerText = "Not enough unique images for more rounds.";
+                console.log("Not enough unique images for more rounds.");
+                return;
+            }
+
             shownImages.push(randomImage); // Add this image to the list of shown images
+            console.log(`Image added to shown list: ${randomImage}`);
             
             let realImage = `images/${randomImage}1.png`;
             let cakeImage = `images/${randomImage}2.png`;
@@ -99,6 +114,7 @@
             let realImageIndex = pair.indexOf(realImage);
             let cakeImageIndex = pair.indexOf(cakeImage);
 
+            // Create image elements
             pair.forEach((imgSrc, index) => {
                 let img = document.createElement("img");
                 img.src = imgSrc;
@@ -108,6 +124,7 @@
             });
         }
         
+        // Check answer function
         function checkAnswer(isReal, imgElement, pair, realImageIndex, realImage) {
             let imageContainer = document.getElementById("imageContainer");
             const allImages = imageContainer.querySelectorAll('.img-element');
